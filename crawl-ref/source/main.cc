@@ -1334,6 +1334,12 @@ static bool _can_take_stairs(dungeon_feature_type ftype, bool down,
     if (ftype == DNGN_PASSAGE_OF_GOLUBRIA || ftype == DNGN_TRANSPORTER)
         return true;
 
+    if (!down && !feat_is_bidirectional_portal(ftype) && crawl_state.game_is_ironman())
+    {
+        mpr("There's no going back now.");
+        return false;
+    }
+
     // Mesmerised
     if (you.beheld() && !you.confused())
     {
