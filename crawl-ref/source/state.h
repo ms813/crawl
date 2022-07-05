@@ -219,6 +219,7 @@ public:
     bool game_is_sprint() const;
     bool game_is_hints() const;
     bool game_is_hints_tutorial() const;
+    bool game_is_ironman() const;
 
     bool seed_is_known() const;
 

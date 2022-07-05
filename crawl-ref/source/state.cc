@@ -592,6 +592,12 @@ bool game_state::game_is_hints() const
     return type == GAME_TYPE_HINTS;
 }
 
+bool game_state::game_is_hints() const
+{
+    ASSERT(game_is_valid_type());
+    return type == GAME_TYPE_IRONMAN;
+}
+
 bool game_state::game_is_hints_tutorial() const
 {
     return game_is_hints() || game_is_tutorial();
@@ -620,6 +626,8 @@ string game_state::game_type_name_for(game_type _type)
         return "Arena";
     case GAME_TYPE_SPRINT:
         return "Dungeon Sprint";
+    case GAME_TYPE_IRONMAN:
+        return "Ironman";
     case NUM_GAME_TYPE:
         return "Unknown";
     }
@@ -656,5 +664,7 @@ string game_state::game_type_qualifier() const
         return "-tutorial";
     if (crawl_state.game_is_hints())
         return "-hints";
+    if (crawl_state.game_is_ironman())
+        return "-ironman";
     return "";
 }
