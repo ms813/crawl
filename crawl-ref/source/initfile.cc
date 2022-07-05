@@ -826,6 +826,8 @@ string gametype_to_str(game_type type)
         return "sprint";
     case GAME_TYPE_HINTS:
         return "hints";
+    case GAME_TYPE_IRONMAN:
+        return "ironman";
     default:
         return "none";
     }
@@ -5068,6 +5070,7 @@ static string _gametype_to_clo(game_type g)
     case GAME_TYPE_SPRINT:
         return cmd_ops[CLO_SPRINT];
     case GAME_TYPE_HINTS: // no CLO?
+    case GAME_TYPE_IRONMAN: // no CLO?
     case GAME_TYPE_NORMAL:
     default:
         return "";

@@ -15,6 +15,7 @@
 #include "delay.h"
 #include "directn.h"
 #include "hints.h"
+#include "initfile.h"
 #include "macro.h"
 #include "menu.h"
 #include "message.h"
@@ -661,15 +662,15 @@ string game_state::game_savedir_path() const
 
 string game_state::game_type_qualifier() const
 {
-    if (type == GAME_TYPE_CUSTOM_SEED)
-        return "-seeded";
-    if (crawl_state.game_is_sprint())
-        return "-sprint";
-    if (crawl_state.game_is_tutorial())
-        return "-tutorial";
-    if (crawl_state.game_is_hints())
-        return "-hints";
-    if (crawl_state.game_is_ironman())
-        return "-ironman";
-    return "";
+    switch (type)
+    {
+    case GAME_TYPE_CUSTOM_SEED:
+    case GAME_TYPE_SPRINT:
+    case GAME_TYPE_HINTS:
+    case GAME_TYPE_TUTORIAL:
+    case GAME_TYPE_IRONMAN:
+        return "-" + gametype_to_str(type);
+    default:
+        return "";
+    }
 }

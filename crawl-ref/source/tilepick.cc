@@ -3484,6 +3484,8 @@ tileidx_t tileidx_gametype(const game_type gtype)
     case GAME_TYPE_NORMAL:
     case GAME_TYPE_CUSTOM_SEED:
         return TILEG_STARTUP_STONESOUP;
+    case GAME_TYPE_IRONMAN:
+        return TILEG_STARTUP_IRONSOUP;
     case GAME_TYPE_TUTORIAL:
         return TILEG_STARTUP_TUTORIAL;
     case GAME_TYPE_HINTS:
