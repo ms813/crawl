@@ -1242,6 +1242,13 @@ static void _fixup_pandemonium_stairs()
     }
 }
 
+static void _fixup_ironman_hatches()
+{
+    for (rectangle_iterator ri(1); ri; ++ri)
+        if (env.grid(*ri) == DNGN_ESCAPE_HATCH_UP)
+            _set_grd(*ri, DNGN_FLOOR);
+}
+
 static void _mask_vault(const vault_placement &place, unsigned mask,
                         function<bool(const coord_def &)> skip_fun = nullptr)
 {
@@ -2767,6 +2774,9 @@ static void _build_dungeon_level()
 
     if (player_in_hell())
         _fixup_hell_stairs();
+
+    if (crawl_state.game_is_ironman())
+        _fixup_ironman_hatches();
 }
 
 static void _dgn_set_floor_colours()
