@@ -2240,11 +2240,11 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
         // new stairs have less wary monsters, and we don't
         // want them to attack players quite as soon.
         // (just_created_level only relevant if we crashed.)
-        you.time_taken *= fast || just_created_level ? 1 : 2;
-
+        const bool fast_entry = fast
+                             || just_created_level
+                             || crawl_state.game_is_ironman();
+        you.time_taken *= fast_entry ? 1 : 2;
         you.time_taken = div_rand_round(you.time_taken * 3, 4);
-
-        dprf("arrival time: %d", you.time_taken);
 
         if (just_created_level)
             run_map_epilogues();
