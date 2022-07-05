@@ -475,7 +475,8 @@ static bool _build_level_vetoable(bool enable_random_maps)
 
     _dgn_set_floor_colours();
 
-    if (crawl_state.game_standard_levelgen()
+    if (crawl_state.game_has_random_floors()
+        && !crawl_state.game_is_ironman()
         && !_valid_dungeon_level())
     {
         return false;
@@ -2696,7 +2697,7 @@ static void _build_dungeon_level()
 
     // Try to place minivaults that really badly want to be placed. Still
     // no guarantees, seeing this is a minivault.
-    if (crawl_state.game_standard_levelgen())
+    if (crawl_state.game_has_random_floors())
     {
         if (place_vaults)
         {

@@ -286,7 +286,7 @@ static void _post_init(bool newc)
     {
         // n.b. temple already generated in setup_game at this point
         if (Options.pregen_dungeon == level_gen_type::full
-            && crawl_state.game_standard_levelgen())
+            && crawl_state.game_has_random_floors())
         {
             pregen_dungeon(level_id(NUM_BRANCHES, -1));
         }

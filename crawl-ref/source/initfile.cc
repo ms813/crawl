@@ -2153,7 +2153,7 @@ void save_player_name()
 // TODO: update all newgame prefs based on the current char, in this function?
 void save_game_prefs()
 {
-    if (!crawl_state.game_standard_levelgen() || Options.no_save)
+    if (!crawl_state.game_saves_prefs() || Options.no_save)
         return;
     // Read existing preferences
     const newgame_def old_prefs = read_startup_prefs();

@@ -551,9 +551,14 @@ bool game_state::player_is_dead() const
     return updating_scores && !need_save;
 }
 
-bool game_state::game_standard_levelgen() const
+bool game_state::game_has_random_floors() const
 {
-    return game_is_normal() || game_is_hints();
+    return game_is_normal() || game_is_hints() || game_is_ironman();
+}
+
+bool game_state::game_saves_prefs() const
+{
+    return game_is_normal() || game_is_hints() || game_is_ironman();
 }
 
 bool game_state::game_is_valid_type() const
@@ -592,7 +597,7 @@ bool game_state::game_is_hints() const
     return type == GAME_TYPE_HINTS;
 }
 
-bool game_state::game_is_hints() const
+bool game_state::game_is_ironman() const
 {
     ASSERT(game_is_valid_type());
     return type == GAME_TYPE_IRONMAN;
