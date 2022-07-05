@@ -422,6 +422,8 @@ static const game_modes_menu_item entries[] =
     {GAME_TYPE_NORMAL, "Dungeon Crawl",
         "Dungeon Crawl: The main game: full of monsters, items, "
         "gods and danger!" },
+    {GAME_TYPE_IRONMAN, "Ironman",
+        "Variant mode with a branching, one-way path through the Dungeon." },
     {GAME_TYPE_CUSTOM_SEED, "Choose Game Seed",
         "Play with a chosen custom dungeon seed." },
     {GAME_TYPE_TUTORIAL, "Tutorial for Dungeon Crawl",
@@ -731,6 +733,7 @@ private:
         switch (selected_game_type)
         {
         case GAME_TYPE_NORMAL:
+        case GAME_TYPE_IRONMAN:
         case GAME_TYPE_CUSTOM_SEED:
         case GAME_TYPE_TUTORIAL:
         case GAME_TYPE_SPRINT:
