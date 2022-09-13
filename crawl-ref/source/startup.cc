@@ -70,7 +70,7 @@ static void _loading_message(string m)
 {
     mpr(m.c_str());
 #ifdef USE_TILE_LOCAL
-    if (!crawl_state.tiles_disabled && crawl_state.title_screen)
+    if (!in_headless_mode() && crawl_state.title_screen)
         loading_screen_update_msg(m.c_str());
 #endif
 }
@@ -127,7 +127,7 @@ static void _initialize()
     // Draw the splash screen before the database gets initialised as that
     // may take awhile and it's better if the player can look at a pretty
     // screen while this happens.
-    if (!crawl_state.tiles_disabled && crawl_state.title_screen)
+    if (!in_headless_mode() && crawl_state.title_screen)
         loading_screen_open();
 #endif
 
@@ -151,7 +151,7 @@ static void _initialize()
         end(0);
 
 #ifdef USE_TILE_LOCAL
-    if (!crawl_state.tiles_disabled && crawl_state.title_screen)
+    if (!in_headless_mode() && crawl_state.title_screen)
         loading_screen_close();
 #endif
 

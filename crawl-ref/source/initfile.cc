@@ -4334,6 +4334,9 @@ enum commandline_option_type
     CLO_SAVE_JSON,
     CLO_GAMETYPES_JSON,
     CLO_EDIT_BONES,
+#if defined(UNIX) || defined(USE_TILE_LOCAL)
+    CLO_HEADLESS,
+#endif
 #ifdef USE_TILE_WEB
     CLO_WEBTILES_SOCKET,
     CLO_AWAIT_CONNECTION,
@@ -4343,20 +4346,30 @@ enum commandline_option_type
     CLO_NOPS
 };
 
+// CLOs that will work ok in headless mode.
 static set<commandline_option_type> clo_headless_ok = {
+// ok in all builds
     CLO_SCORES,
-    CLO_DUMP_MAPS,
-    CLO_TEST,
-    CLO_SCRIPT,
     CLO_BUILDDB,
     CLO_HELP,
     CLO_VERSION,
     CLO_PLAYABLE_JSON, // JSON metadata for species, jobs, combos.
+    CLO_BRANCHES_JSON, // JSON metadata for branches.
     CLO_EDIT_BONES,
+    CLO_MAPSTAT,
+    CLO_MAPSTAT_DUMP_DISCONNECT,
+    CLO_OBJSTAT,
+#ifndef USE_TILE_LOCAL
+// TODO: not implemented for local tiles
+    CLO_TEST,
+    CLO_SCRIPT,
+#endif
 #ifdef USE_TILE_WEB
     CLO_WEBTILES_SOCKET,
     CLO_AWAIT_CONNECTION,
     CLO_PRINT_WEBTILES_OPTIONS,
+    CLO_SAVE_JSON,
+    CLO_GAMETYPES_JSON,
 #endif
 };
 
@@ -4370,6 +4383,9 @@ static const char *cmd_ops[] =
     "print-charset", "tutorial", "wizard", "explore", "no-save",
     "no-player-bones", "gdb", "no-gdb", "nogdb", "throttle", "no-throttle",
     "playable-json", "branches-json", "save-json", "gametypes-json", "bones",
+#if defined(UNIX) || defined(USE_TILE_LOCAL)
+    "headless",
+#endif
 #ifdef USE_TILE_WEB
     "webtiles-socket", "await-connection", "print-webtiles-options",
 #endif
@@ -5172,12 +5188,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
     SysEnv.map_gen_iters = 0;
 
     if (argc < 2)           // no args!
-        return
-#ifdef USE_TILE_LOCAL
-            true;
-#else
-            !in_headless_mode();
-#endif
+        return true;
 
     char *arg, *next_arg;
     int current = 1;
@@ -5213,21 +5224,6 @@ bool parse_args(int argc, char **argv, bool rc_only)
         char c = arg[0];
         if (c != '-')
         {
-#ifndef USE_TILE_LOCAL
-            if (in_headless_mode())
-            {
-                crawl_state.test   = true;
-                crawl_state.script = true;
-                crawl_state.script_args.clear();
-                crawl_state.tests_selected = split_string(",", arg);
-                if (current < argc - 1)
-                {
-                    for (int extra = current + 1; extra < argc; ++extra)
-                        crawl_state.script_args.emplace_back(argv[extra]);
-                }
-                return true;
-            }
-#endif
             fprintf(stderr,
                     "Option '%s' is invalid; options must be prefixed "
                     "with -\n\n", arg);
@@ -5324,9 +5320,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
                 crawl_state.map_stat_gen = true;
             else
                 crawl_state.obj_stat_gen = true;
-#ifdef USE_TILE_LOCAL
-            crawl_state.tiles_disabled = true;
-#endif
+            enter_headless_mode();
 
             if (!SysEnv.map_gen_iters)
                 SysEnv.map_gen_iters = 100;
@@ -5413,6 +5407,12 @@ bool parse_args(int argc, char **argv, bool rc_only)
             end(0);
 
         case CLO_TEST:
+#ifndef USE_TILE_LOCAL
+            // TODO: are there any tests/scripts that make sense without
+            // headless mode in console?
+            // TODO: headless mode for tiles not implemented for scripts/tests
+            enter_headless_mode();
+#endif
             crawl_state.test = true;
             if (next_is_param)
             {
@@ -5422,7 +5422,27 @@ bool parse_args(int argc, char **argv, bool rc_only)
             }
             break;
 
+#if defined(UNIX) || defined(USE_TILE_LOCAL)
+        case CLO_HEADLESS:
+            enter_headless_mode();
+#ifdef USE_TILE_LOCAL
+            break;
+#else
+            if (!next_is_param)
+                break;
+            // intentional fallthrough: let -headless optionally take a script
+            // name (for non-local-tiles)
+            seen_headless_ok = true;
+#endif
+#endif
+
         case CLO_SCRIPT:
+#ifndef USE_TILE_LOCAL
+            // TODO: are there any tests/scripts that make sense without
+            // headless mode in console?
+            // TODO: headless mode for tiles not implemented for scripts/tests
+            enter_headless_mode();
+#endif
             crawl_state.test   = true;
             crawl_state.script = true;
             crawl_state.script_args.clear();
@@ -5435,6 +5455,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
             }
             else
             {
+                // should be unreachable for CLO_HEADLESS
                 end(1, false,
                     "-script must specify comma-separated script names");
             }
@@ -5699,11 +5720,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
         if (nextUsed)
             current++;
     }
-    return
-#ifndef USE_TILE_LOCAL
-        in_headless_mode() ? seen_headless_ok :
-#endif
-        true;
+    return !in_headless_mode() || seen_headless_ok;
 }
 
 ///////////////////////////////////////////////////////////////////////
