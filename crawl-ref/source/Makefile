@@ -2111,8 +2111,8 @@ test: test-test test-all
 nonwiztest: test-test test-nonwiz
 nondebugtest: test-all
 
-test-%: $(GAME) util/fake_pty builddb
-	util/fake_pty test/stress/run $*
+test-%: $(GAME) builddb util/fake_pty
+	test/stress/run $*
 	@echo "Finished: $*"
 
 util/fake_pty: util/fake_pty.c
