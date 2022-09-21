@@ -54,6 +54,10 @@ static struct termios game_term;
 #define HEADLESS_LINES 24
 #define HEADLESS_COLS 80
 
+// for some reason we use 1 indexing internally
+static int headless_x = 1;
+static int headless_y = 1;
+
 // Its best if curses comes at the end (name conflicts with Solaris). -- bwr
 #ifndef CURSES_INCLUDE_FILE
     #ifndef _XOPEN_SOURCE_EXTENDED
@@ -913,9 +917,6 @@ void console_shutdown()
 
 void cprintf(const char *format, ...)
 {
-    if (_headless_mode)
-        return;
-
     char buffer[2048];          // One full screen if no control seq...
 
     va_list argp;
@@ -929,15 +930,31 @@ void cprintf(const char *format, ...)
     while (int s = utf8towc(&c, bp))
     {
         bp += s;
+        // headless check handled in putwch
         putwch(c);
     }
 }
 
 void putwch(char32_t chr)
 {
-    if (!_headless_mode)
+    wchar_t c = chr; // ??
+    if (_headless_mode)
     {
-        wchar_t c = chr;
+        // simulate cursor movement and wrapping
+        headless_x += c ? wcwidth(chr) : 0;
+        if (headless_x >= HEADLESS_COLS && headless_y >= HEADLESS_LINES)
+        {
+            headless_x = HEADLESS_COLS;
+            headless_y = HEADLESS_LINES;
+        }
+        else if (headless_x > HEADLESS_COLS)
+        {
+            headless_y++;
+            headless_x = headless_x - HEADLESS_COLS;
+        }
+    }
+    else
+    {
         if (!c)
             c = ' ';
         // TODO: recognize unsupported characters and try to transliterate
@@ -954,9 +971,6 @@ void putwch(char32_t chr)
 
 void puttext(int x1, int y1, const crawl_view_buffer &vbuf)
 {
-    if (_headless_mode)
-        return;
-
     const screen_cell_t *cell = vbuf;
     const coord_def size = vbuf.size();
     for (int y = 0; y < size.y; ++y)
@@ -964,6 +978,7 @@ void puttext(int x1, int y1, const crawl_view_buffer &vbuf)
         cgotoxy(x1, y1 + y);
         for (int x = 0; x < size.x; ++x)
         {
+            // headless check handled in putwch, which this calls
             put_colour_ch(cell->colour, cell->glyph);
             cell++;
         }
@@ -996,7 +1011,7 @@ void clear_to_end_of_line()
     {
         textcolour(LIGHTGREY);
         textbackground(BLACK);
-        clrtoeol();
+        clrtoeol(); // shouldn't move cursor pos
     }
 
 #ifdef USE_TILE_WEB
@@ -1046,7 +1061,11 @@ suppress_dgl_clrscr::~suppress_dgl_clrscr()
 void clrscr_sys()
 {
     if (_headless_mode)
+    {
+        headless_x = 1;
+        headless_y = 1;
         return;
+    }
 
     textcolour(LIGHTGREY);
     textbackground(BLACK);
@@ -1620,9 +1639,6 @@ void textbackground(int col)
 #endif
 }
 
-static int headless_x = 1;
-static int headless_y = 1;
-
 void gotoxy_sys(int x, int y)
 {
     if (_headless_mode)
@@ -1769,6 +1785,7 @@ void fakecursorxy(int x, int y)
     if (_headless_mode)
     {
         gotoxy_sys(x, y);
+        set_cursor_region(GOTO_CRT);
         return;
     }
 
