@@ -70,8 +70,7 @@ static void _loading_message(string m)
 {
     mpr(m.c_str());
 #ifdef USE_TILE_LOCAL
-    if (!in_headless_mode() && crawl_state.title_screen)
-        loading_screen_update_msg(m.c_str());
+    loading_screen_update_msg(m.c_str());
 #endif
 }
 
@@ -127,8 +126,7 @@ static void _initialize()
     // Draw the splash screen before the database gets initialised as that
     // may take awhile and it's better if the player can look at a pretty
     // screen while this happens.
-    if (!in_headless_mode() && crawl_state.title_screen)
-        loading_screen_open();
+    loading_screen_open();
 #endif
 
     // Initialise internal databases.
@@ -151,8 +149,7 @@ static void _initialize()
         end(0);
 
 #ifdef USE_TILE_LOCAL
-    if (!in_headless_mode() && crawl_state.title_screen)
-        loading_screen_close();
+    loading_screen_close();
 #endif
 
     you.game_seed = crawl_state.seed;
