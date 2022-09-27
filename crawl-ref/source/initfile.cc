@@ -4361,11 +4361,11 @@ static set<commandline_option_type> clo_headless_ok = {
     CLO_OBJSTAT,
 #ifndef USE_TILE_LOCAL
 // TODO: not implemented for local tiles
-    CLO_ARENA,
     CLO_RC,
+#endif
+    CLO_ARENA,
     CLO_TEST,
     CLO_SCRIPT,
-#endif
 #ifdef USE_TILE_WEB
     CLO_WEBTILES_SOCKET,
     CLO_AWAIT_CONNECTION,
@@ -5439,12 +5439,11 @@ bool parse_args(int argc, char **argv, bool rc_only)
 #endif
 
         case CLO_SCRIPT:
-#ifndef USE_TILE_LOCAL
             // TODO: are there any tests/scripts that make sense without
             // headless mode in console?
             // TODO: headless mode for tiles not implemented for scripts/tests
             enter_headless_mode();
-#endif
+
             crawl_state.test   = true;
             crawl_state.script = true;
             crawl_state.script_args.clear();
@@ -5467,9 +5466,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
             if (next_is_param)
                 return false;
             crawl_state.build_db = true;
-#ifdef USE_TILE_LOCAL
-            crawl_state.tiles_disabled = true;
-#endif
+            enter_headless_mode();
             break;
 
         case CLO_GDB:
