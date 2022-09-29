@@ -107,6 +107,9 @@ enum class passive_t
     /// No distortion unwield effects.
     safe_distortion,
 
+    /// After god wrath, enemies nearby are banished.
+    wrath_banishment,
+
     /// Less map rot in the abyss.
     map_rot_res_abyss,
 
